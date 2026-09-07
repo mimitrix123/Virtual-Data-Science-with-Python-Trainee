@@ -9,22 +9,18 @@ SEED = 42
 torch.manual_seed(SEED)
 np.random.seed(SEED)
 
-# Load public Digits dataset
- digits = load_digits()
+digits = load_digits()
 X = digits.data.astype(np.float32)
 y = digits.target.astype(np.int64)
 
-# Stratified train/test split
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.20, random_state=SEED, stratify=y
 )
 
-# Fit preprocessing only on training data
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train).astype(np.float32)
 X_test = scaler.transform(X_test).astype(np.float32)
 
-# Validation split from training data
 X_train, X_val, y_train, y_val = train_test_split(
     X_train, y_train, test_size=0.15, random_state=SEED, stratify=y_train
 )
@@ -80,14 +76,14 @@ for epoch in range(60):
     if wait >= 8:
         break
 
-# Restore best validation checkpoint
 model.load_state_dict(best_state)
 model.eval()
 with torch.no_grad():
     predictions = model(X_test).argmax(1).numpy()
 
-print(f"Test accuracy: {accuracy_score(y_test.numpy(), predictions):.4f}")
-print(f"Macro F1: {f1_score(y_test.numpy(), predictions, average='macro'):.4f}")
+y_true = y_test.numpy()
+print(f"Test accuracy: {accuracy_score(y_true, predictions):.4f}")
+print(f"Macro F1: {f1_score(y_true, predictions, average='macro'):.4f}")
 print("\nClassification report:\n")
-print(classification_report(y_test.numpy(), predictions))
-print("Confusion matrix:\n", confusion_matrix(y_test.numpy(), predictions))
+print(classification_report(y_true, predictions))
+print("Confusion matrix:\n", confusion_matrix(y_true, predictions))
